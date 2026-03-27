@@ -1,5 +1,6 @@
 import InvoiceForm from "./components/InvoiceForm";
 import InvoiceList from "./components/InvoiceList";
+import "bootstrap/dist/css/bootstrap.min.css";
 
 function App() {
   return (
