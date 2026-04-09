@@ -2,10 +2,12 @@ import React, { useState } from "react";
 import { Form, Button } from "react-bootstrap";
 import API from "../services/api";
 
-export default function InvoiceForm({ onSuccess }) {
+export default function InvoiceForm({ onSuccess, formattedDate }) {
   const [customerName, setCustomerName] = useState("");
 
-  const [items, setItems] = useState([{ name: "", quantity: 1, price: 0 }]);
+  const [items, setItems] = useState([
+    { name: "", quantity: 1, price: 0, date: new Date() },
+  ]);
 
   // Handle item change
   const handleItemChange = (index, field, value) => {
@@ -16,7 +18,10 @@ export default function InvoiceForm({ onSuccess }) {
 
   // Add item
   const addItem = () => {
-    setItems([...items, { name: "", quantity: 1, price: 0 }]);
+    setItems([
+      ...items,
+      { name: "", quantity: 1, price: 0, date: formattedDate },
+    ]);
   };
 
   // Remove item

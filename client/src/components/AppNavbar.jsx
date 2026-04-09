@@ -6,6 +6,9 @@ import InvoiceForm from "./InvoiceForm";
 export default function AppNavbar() {
   const [show, setShow] = useState(false);
 
+  const today = new Date();
+  const formattedDate = `${today.getDate()}/${today.getMonth() + 1}/${today.getFullYear()}`;
+
   return (
     <>
       <Navbar bg="dark" variant="dark" expand="lg">
@@ -26,12 +29,15 @@ export default function AppNavbar() {
       </Navbar>
 
       {/* Modal */}
-      <Modal show={show} onHide={() => setShow(false)} centered>
+      <Modal show={show} onHide={() => setShow(false)} centered size="lg">
         <Modal.Header closeButton>
-          <Modal.Title>Create Invoice</Modal.Title>
+          <Modal.Title>Create Invoice : {formattedDate}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <InvoiceForm onSuccess={() => setShow(false)} />
+          <InvoiceForm
+            onSuccess={() => setShow(false)}
+            formattedDate={formattedDate}
+          />
         </Modal.Body>
       </Modal>
     </>
