@@ -1,6 +1,6 @@
 // components/InvoiceList.js
 import React, { useEffect, useRef, useState } from "react";
-import { Table, Container } from "react-bootstrap";
+import { Table, Container, Button, Form } from "react-bootstrap";
 import styled from "styled-components";
 import API from "../services/api";
 import InvoicePrint from "./InvoicePrint";
@@ -15,6 +15,14 @@ const Card = styled.div`
 
 export default function InvoiceList() {
   const [data, setData] = useState([]);
+  const [searchName, setSearchName] = useState([]);
+
+  const filterName = data?.filter((item) =>
+    item?.customerName
+      ?.toLowerCase()
+      .includes((searchName || "").toString().toLowerCase()),
+  );
+  console.log("filterName", filterName);
 
   const [selected, setSelected] = useState(null);
 
@@ -25,7 +33,11 @@ export default function InvoiceList() {
   }, []);
 
   const handlePrint = (inv) => {
-    setSelected(inv);
+    setSelected(null);
+
+    setTimeout(() => {
+      setSelected(inv);
+    }, 0);
   };
 
   useEffect(() => {
@@ -53,9 +65,18 @@ export default function InvoiceList() {
   return (
     <Container>
       <Card>
-        <h4>Invoice List</h4>
+        <div className="d-flex justify-content-between">
+          <h4>Invoice List</h4>
+          <div>
+            <Form.Control
+              type="search"
+              placeholder="Search Custemr Name"
+              onChange={(e) => setSearchName(e.target.value)}
+            />
+          </div>
+        </div>
 
-        <Table striped bordered hover>
+        <Table striped bordered hover className="mt-2">
           <thead>
             <tr>
               <th>#</th>
@@ -66,13 +87,19 @@ export default function InvoiceList() {
           </thead>
 
           <tbody>
-            {data.map((inv, index) => (
+            {filterName.map((inv, index) => (
               <tr key={inv._id}>
                 <td>{index + 1}</td>
                 <td>{inv.customerName}</td>
                 <td>₹{inv.totalAmount}</td>
                 <td>
-                  <button onClick={() => handlePrint(inv)}>Print</button>
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    onClick={() => handlePrint(inv)}
+                  >
+                    Print
+                  </Button>
                 </td>
               </tr>
             ))}
