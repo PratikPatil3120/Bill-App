@@ -13,6 +13,8 @@ const invoiceSchema = new mongoose.Schema(
     customerName: String,
     items: [itemSchema],
     totalAmount: Number,
+    custmer_no: Number,
+    advance: Number,
   },
   { timestamps: true },
 );

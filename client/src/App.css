@@ -36,3 +36,15 @@
     transform: rotate(360deg);
   }
 }
+.tabel-scroll {
+  max-height: 40vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.tabel-scroll thead th {
+  position: sticky;
+  top: 0;
+  background: #fff;
+  z-index: 2;
+}

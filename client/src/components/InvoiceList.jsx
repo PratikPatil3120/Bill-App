@@ -4,6 +4,7 @@ import { Table, Container, Button, Form } from "react-bootstrap";
 import styled from "styled-components";
 import API from "../services/api";
 import InvoicePrint from "./InvoicePrint";
+import Pagination from "./common/Pagination";
 
 const Card = styled.div`
   background: #fff;
@@ -17,12 +18,21 @@ export default function InvoiceList() {
   const [data, setData] = useState([]);
   const [searchName, setSearchName] = useState([]);
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const recordsPerPage = 10;
+
   const filterName = data?.filter((item) =>
     item?.customerName
       ?.toLowerCase()
       .includes((searchName || "").toString().toLowerCase()),
   );
-  console.log("filterName", filterName);
+
+  const indexOfLast = currentPage * recordsPerPage;
+  const indexOfFirst = indexOfLast - recordsPerPage;
+
+  const currentRecords = filterName.slice(indexOfFirst, indexOfLast);
+
+  console.log("filterName,,,,,,,,,,,", filterName);
 
   const [selected, setSelected] = useState(null);
 
@@ -71,40 +81,63 @@ export default function InvoiceList() {
             <Form.Control
               type="search"
               placeholder="Search Custemr Name"
-              onChange={(e) => setSearchName(e.target.value)}
+              onChange={(e) => {
+                setSearchName(e.target.value);
+                setCurrentPage(1); // ✅ reset page
+              }}
             />
           </div>
         </div>
 
-        <Table striped bordered hover className="mt-2">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Customer</th>
-              <th>Amount</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {filterName.map((inv, index) => (
-              <tr key={inv._id}>
-                <td>{index + 1}</td>
-                <td>{inv.customerName}</td>
-                <td>₹{inv.totalAmount}</td>
-                <td>
-                  <Button
-                    variant="primary"
-                    size="sm"
-                    onClick={() => handlePrint(inv)}
-                  >
-                    Print
-                  </Button>
-                </td>
+        <div className="tabel-scroll">
+          <Table striped bordered hover className="mt-2">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Customer</th>
+                <th>Mobile Number</th>
+                <th>Advnace Payment</th>
+                <th>Pending Payment</th>
+                <th>Total Amount</th>
+                <th>Action</th>
               </tr>
-            ))}
-          </tbody>
-        </Table>
+            </thead>
+
+            <tbody>
+              {currentRecords.map((inv, index) => (
+                <tr key={inv._id}>
+                  <td>{index + 1}</td>
+                  <td>{inv.customerName}</td>
+                  <td>{inv.custmer_no}</td>
+                  <td>₹{inv.advance ? inv.advance : "0"}</td>
+                  <td style={{ color: "red" }}>
+                    ₹
+                    {inv.advance
+                      ? inv.totalAmount - inv.advance
+                      : inv.totalAmount}
+                  </td>
+                  <td>₹{inv.totalAmount}</td>
+
+                  <td>
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      onClick={() => handlePrint(inv)}
+                    >
+                      Print
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+          <Pagination
+            totalRecords={filterName.length}
+            recordsPerPage={recordsPerPage}
+            currentPage={currentPage}
+            onPageChange={setCurrentPage}
+          />
+        </div>
       </Card>
 
       {/* ✅ THIS WAS MISSING */}

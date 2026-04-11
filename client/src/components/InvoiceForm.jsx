@@ -1,9 +1,11 @@
 import React, { useState } from "react";
-import { Form, Button } from "react-bootstrap";
+import { Form, Button, Row, Col } from "react-bootstrap";
 import API from "../services/api";
 
 export default function InvoiceForm({ onSuccess, formattedDate }) {
   const [customerName, setCustomerName] = useState("");
+  const [customerNo, setCustomerNo] = useState("");
+  const [addvancePayment, setAddvancePayment] = useState("");
 
   const [items, setItems] = useState([
     { name: "", quantity: 1, price: 0, date: new Date() },
@@ -41,6 +43,8 @@ export default function InvoiceForm({ onSuccess, formattedDate }) {
 
     await API.post("/invoices", {
       customerName,
+      custmer_no: customerNo,
+      advance: addvancePayment,
       items,
       totalAmount,
     });
@@ -49,6 +53,7 @@ export default function InvoiceForm({ onSuccess, formattedDate }) {
 
     // reset form
     setCustomerName("");
+    setCustomerNo("");
     setItems([{ name: "", quantity: 1, price: 0 }]);
 
     onSuccess && onSuccess();
@@ -57,18 +62,40 @@ export default function InvoiceForm({ onSuccess, formattedDate }) {
   return (
     <Form onSubmit={handleSubmit}>
       {/* Customer Name */}
-      <Form.Group className="mb-3">
-        <Form.Label>Customer Name</Form.Label>
-        <Form.Control
-          type="text"
-          value={customerName}
-          onChange={(e) => setCustomerName(e.target.value)}
-          required
-        />
-      </Form.Group>
+      <Row>
+        <Col>
+          <Form.Label>Customer Name</Form.Label>
+          <Form.Control
+            type="text"
+            value={customerName}
+            onChange={(e) => setCustomerName(e.target.value)}
+            required
+          />
+        </Col>
+      </Row>
+      <Row className="mt-2">
+        <Col>
+          <Form.Label>Mobile Number</Form.Label>
+          <Form.Control
+            type="text"
+            value={customerNo}
+            onChange={(e) => setCustomerNo(e.target.value)}
+            required
+          />
+        </Col>
+        <Col>
+          <Form.Label>Advance Payment</Form.Label>
+          <Form.Control
+            type="text"
+            value={addvancePayment}
+            onChange={(e) => setAddvancePayment(e.target.value)}
+            required
+          />
+        </Col>
+      </Row>
 
       {/* Items Section */}
-      <h5>Items</h5>
+      <h5 className="mt-1">Items</h5>
 
       {items.map((item, index) => (
         <div key={index} className="d-flex gap-2 mb-2">
