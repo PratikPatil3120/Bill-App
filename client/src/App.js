@@ -1,18 +1,23 @@
 // App.js
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import AppNavbar from "./components/AppNavbar";
-import InvoiceList from "./components/InvoiceList";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
+import "react-toastify/dist/ReactToastify.css";
+import { ToastContainer } from "react-toastify";
+import AppNavbar from "./components/AppNavbar";
 
 function App() {
   return (
-    <Router>
-      <AppNavbar />
-      <Routes>
-        <Route path="/" element={<InvoiceList />} />
-      </Routes>
-    </Router>
+    <>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<AppNavbar />} />
+        </Routes>
+      </BrowserRouter>
+
+      {/* ✅ GLOBAL TOAST */}
+      <ToastContainer position="top-right" autoClose={3000} theme="dark" />
+    </>
   );
 }
 

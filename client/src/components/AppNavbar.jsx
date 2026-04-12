@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { Navbar, Nav, Container, Button, Modal } from "react-bootstrap";
 import InvoiceForm from "./InvoiceForm";
+import InvoiceList from "./InvoiceList";
 
 export default function AppNavbar() {
   const [show, setShow] = useState(false);
@@ -13,12 +14,22 @@ export default function AppNavbar() {
     <>
       <Navbar bg="dark" variant="dark" expand="lg">
         <Container>
-          <Navbar.Brand href="#">Invoice App</Navbar.Brand>
+          <Navbar.Brand href="#" className="d-flex align-items-center gap-2">
+            <img
+              src="/graphicsLogo.jpg"
+              alt="logo"
+              style={{
+                width: "40px",
+                height: "40px",
+                borderRadius: "50%", // ✅ makes it circular
+                objectFit: "cover",
+              }}
+            />
+            <span>Balaji Graphics</span>
+          </Navbar.Brand>{" "}
           <Navbar.Toggle />
           <Navbar.Collapse className="justify-content-between">
-            <Nav>
-              <Nav.Link href="#">Invoices</Nav.Link>
-            </Nav>
+            <Nav>{/* <Nav.Link href="#">Invoices</Nav.Link> */}</Nav>
 
             {/* Right Side Button */}
             <Button variant="success" onClick={() => setShow(true)}>
@@ -40,6 +51,8 @@ export default function AppNavbar() {
           />
         </Modal.Body>
       </Modal>
+
+      <InvoiceList />
     </>
   );
 }

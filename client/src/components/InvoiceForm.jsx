@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Form, Button, Row, Col } from "react-bootstrap";
 import API from "../services/api";
+import { toast } from "react-toastify";
 
 export default function InvoiceForm({ onSuccess, formattedDate }) {
   const [customerName, setCustomerName] = useState("");
@@ -36,27 +37,33 @@ export default function InvoiceForm({ onSuccess, formattedDate }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const totalAmount = items.reduce(
-      (sum, item) => sum + item.quantity * item.price,
-      0,
-    );
+    try {
+      const totalAmount = items.reduce(
+        (sum, item) => sum + item.quantity * item.price,
+        0,
+      );
 
-    await API.post("/invoices", {
-      customerName,
-      custmer_no: customerNo,
-      advance: addvancePayment,
-      items,
-      totalAmount,
-    });
+      await API.post("/invoices", {
+        customerName,
+        custmer_no: customerNo,
+        advance: addvancePayment,
+        items,
+        totalAmount,
+      });
 
-    alert("Invoice Created");
+      console.log("API SUCCESS"); // 👈 check this
 
-    // reset form
-    setCustomerName("");
-    setCustomerNo("");
-    setItems([{ name: "", quantity: 1, price: 0 }]);
+      toast.success("✅ Invoice created successfully!");
 
-    onSuccess && onSuccess();
+      setCustomerName("");
+      setCustomerNo("");
+      setItems([{ name: "", quantity: 1, price: 0 }]);
+
+      onSuccess && onSuccess();
+    } catch (error) {
+      console.error("API ERROR", error); // 👈 IMPORTANT
+      toast.error("❌ Failed to create invoice");
+    }
   };
 
   return (
