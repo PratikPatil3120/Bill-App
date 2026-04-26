@@ -1,64 +1,176 @@
-import { useState } from "react";
+import React, { useState } from "react";
+import { Form, Button, Row, Col } from "react-bootstrap";
 import API from "../services/api";
-import { Button } from "react-bootstrap";
+import { toast } from "react-toastify";
 
-export default function InvoiceForm() {
+export default function InvoiceForm({ onSuccess, formattedDate, setFetch }) {
   const [customerName, setCustomerName] = useState("");
+  const [address, setAddress] = useState("");
+  const [customerNo, setCustomerNo] = useState("");
+  const [addvancePayment, setAddvancePayment] = useState("");
+
   const [items, setItems] = useState([
-    { name: "", size: "", quantity: "", price: "" },
+    { name: "", quantity: 1, price: 0, date: new Date() },
   ]);
 
+  // Handle item change
+  const handleItemChange = (index, field, value) => {
+    const updated = [...items];
+    updated[index][field] = value;
+    setItems(updated);
+  };
+
+  // Add item
+  const addItem = () => {
+    setItems([
+      ...items,
+      { name: "", quantity: 1, price: 0, date: formattedDate },
+    ]);
+  };
+
+  // Remove item
+  const removeItem = (index) => {
+    const updated = items.filter((_, i) => i !== index);
+    setItems(updated);
+  };
+
+  // Submit
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const totalAmount = items.reduce(
-      (sum, item) => sum + item.quantity * item.price,
-      0,
-    );
+    try {
+      const formattedItems = items.map((item) => ({
+        ...item,
+        date: new Date(item.date), // ✅ convert to valid Date
+      }));
+      const totalAmount = items.reduce(
+        (sum, item) => sum + Number(item.price || 0),
+        0,
+      );
 
-    await API.post("/invoices", {
-      customerName,
-      items,
-      totalAmount,
-    });
+      await API.post("/invoices", {
+        customerName,
+        custmer_no: customerNo,
+        advance: addvancePayment,
+        address,
+        items: formattedItems, // ✅ use formatted items
+        totalAmount,
+      });
 
-    alert("Invoice Created");
+      console.log("API SUCCESS"); // 👈 check this
+
+      toast.success("✅ Invoice created successfully!");
+      setFetch(true);
+
+      setCustomerName("");
+      setCustomerNo("");
+      setItems([{ name: "", quantity: 1, price: 0 }]);
+
+      onSuccess && onSuccess();
+    } catch (error) {
+      console.error("API ERROR", error); // 👈 IMPORTANT
+      toast.error("❌ Failed to create invoice");
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <input
-        placeholder="Customer Name"
-        onChange={(e) => setCustomerName(e.target.value)}
-      />
-      <input
-        placeholder="Item Name"
-        onChange={(e) =>
-          setItems((prev) => [{ ...prev[0], name: e.target.value }])
-        }
-      />
-      <input
-        placeholder="Size"
-        onChange={(e) =>
-          setItems((prev) => [{ ...prev[0], size: e.target.value }])
-        }
-      />
-      <input
-        placeholder="Quantity"
-        onChange={(e) =>
-          setItems((prev) => [{ ...prev[0], quantity: Number(e.target.value) }])
-        }
-      />
-      <input
-        placeholder="Price"
-        onChange={(e) =>
-          setItems((prev) => [{ ...prev[0], price: Number(e.target.value) }])
-        }
-      />
-      s
-      <Button size="sm" className="ms-3" type="submit">
-        Save
+    <Form onSubmit={handleSubmit}>
+      {/* Customer Name */}
+      <Row>
+        <Col>
+          <Form.Label>Customer Name</Form.Label>
+          <Form.Control
+            type="text"
+            value={customerName}
+            onChange={(e) => setCustomerName(e.target.value)}
+            required
+          />
+        </Col>
+        <Col>
+          <Form.Label>Address</Form.Label>
+          <Form.Control
+            type="text"
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
+            required
+          />
+        </Col>
+      </Row>
+      <Row className="mt-2">
+        <Col>
+          <Form.Label>Mobile Number</Form.Label>
+          <Form.Control
+            type="text"
+            value={customerNo}
+            onChange={(e) => setCustomerNo(e.target.value)}
+            required
+          />
+        </Col>
+        <Col>
+          <Form.Label>Advance Payment</Form.Label>
+          <Form.Control
+            type="text"
+            value={addvancePayment}
+            onChange={(e) => setAddvancePayment(e.target.value)}
+            required
+          />
+        </Col>
+      </Row>
+
+      {/* Items Section */}
+      <h5 className="mt-1">Items</h5>
+
+      {items.map((item, index) => (
+        <div key={index} className="d-flex gap-2 mb-2">
+          <Form.Control
+            placeholder="Item Name"
+            value={item.name}
+            onChange={(e) => handleItemChange(index, "name", e.target.value)}
+          />
+
+          <Form.Control
+            type="number"
+            placeholder="Qty"
+            value={item.quantity}
+            onChange={(e) =>
+              handleItemChange(index, "quantity", Number(e.target.value))
+            }
+          />
+
+          <Form.Control
+            type="number"
+            placeholder="Price"
+            value={item.price}
+            onChange={(e) =>
+              handleItemChange(index, "price", Number(e.target.value))
+            }
+          />
+
+          <Button variant="danger" onClick={() => removeItem(index)}>
+            X
+          </Button>
+        </div>
+      ))}
+
+      {/* Add Item Button */}
+      <Button variant="secondary" onClick={addItem} className="mb-3">
+        + Add Item
       </Button>
-    </form>
+
+      {/* Total */}
+      {/* <div className="mb-3">
+        <b>
+          Total: ₹
+          {items.reduce((sum, item) => sum + item.quantity * item.price, 0)}
+        </b>
+      </div> */}
+
+      {/* Submit */}
+      <div className="text-end">
+        <Button type="submit" size="lg">
+          Save
+        </Button>
+      </div>
+    </Form>
   );
 }

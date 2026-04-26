@@ -17,3 +17,50 @@ export const getInvoices = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+export const deleteInvoice = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const deletedInvoice = await Invoice.findByIdAndDelete(id);
+
+    if (!deletedInvoice) {
+      return res.status(404).json({
+        message: "Error while deleting invoice",
+      });
+    }
+
+    return res.status(200).json({
+      message: "Successfully deleted",
+    });
+  } catch (err) {
+    return res.status(500).json({
+      message: "Server error",
+      error: err.message,
+    });
+  }
+};
+
+export const getInvoicesById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const invoice = await Invoice.findById(id);
+
+    if (!invoice) {
+      return res.status(404).json({
+        message: "Invoice not found",
+      });
+    }
+
+    return res.status(200).json({
+      message: "Invoice fetched successfully",
+      data: invoice,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Server error",
+      error: error.message,
+    });
+  }
+};

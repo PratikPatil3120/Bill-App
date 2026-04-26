@@ -5,6 +5,7 @@ const itemSchema = new mongoose.Schema({
   size: String,
   quantity: Number,
   price: Number,
+  date: Date,
 });
 
 const invoiceSchema = new mongoose.Schema(
@@ -12,6 +13,9 @@ const invoiceSchema = new mongoose.Schema(
     customerName: String,
     items: [itemSchema],
     totalAmount: Number,
+    custmer_no: Number,
+    advance: Number,
+    address: String,
   },
   { timestamps: true },
 );

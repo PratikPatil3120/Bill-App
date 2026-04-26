@@ -1,14 +1,23 @@
-import InvoiceForm from "./components/InvoiceForm";
-import InvoiceList from "./components/InvoiceList";
+// App.js
+import React from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
+import "react-toastify/dist/ReactToastify.css";
+import { ToastContainer } from "react-toastify";
+import AppNavbar from "./components/AppNavbar";
 
 function App() {
   return (
-    <div>
-      <h1>Billing System</h1>
-      <InvoiceForm />
-      <InvoiceList />
-    </div>
+    <>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<AppNavbar />} />
+        </Routes>
+      </BrowserRouter>
+
+      {/* ✅ GLOBAL TOAST */}
+      <ToastContainer position="top-right" autoClose={3000} theme="dark" />
+    </>
   );
 }
 
