@@ -6,6 +6,7 @@ import InvoiceList from "./InvoiceList";
 
 export default function AppNavbar() {
   const [show, setShow] = useState(false);
+  const [fetch, setFetch] = useState(false);
 
   const today = new Date();
   const formattedDate = `${today.getDate()}/${today.getMonth() + 1}/${today.getFullYear()}`;
@@ -48,11 +49,12 @@ export default function AppNavbar() {
           <InvoiceForm
             onSuccess={() => setShow(false)}
             formattedDate={formattedDate}
+            setFetch={setFetch}
           />
         </Modal.Body>
       </Modal>
 
-      <InvoiceList />
+      <InvoiceList fetch={fetch} setFetch={setFetch} />
     </>
   );
 }

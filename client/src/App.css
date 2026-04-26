@@ -48,3 +48,8 @@
   background: #fff;
   z-index: 2;
 }
+.no-data-container {
+  text-align: center;
+  padding: 10px 0;
+  color: #888;
+}

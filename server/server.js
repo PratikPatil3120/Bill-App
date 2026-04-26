@@ -1,19 +1,28 @@
 import express from "express";
-import cors from "cors";
 import dotenv from "dotenv";
 import connectDB from "./config/db.js";
+import cors from "cors";
+
+// import your routes
 import invoiceRoutes from "./routes/invoiceRoutes.js";
 
-dotenv.config();
-connectDB();
+dotenv.config(); // MUST be at top
 
 const app = express();
 
-app.use(cors());
+// connect DB
+connectDB();
+
+// middleware
 app.use(express.json());
+app.use(cors()); // allow frontend requests
 
-app.use("/api/invoices", invoiceRoutes);
+// mount routes
+app.use("/api/invoices", invoiceRoutes); // ✅ THIS WAS MISSING
 
-app.listen(process.env.PORT, () =>
-  console.log(`Server running on port ${process.env.PORT}`),
-);
+// use PORT from env or fallback
+const PORT = process.env.PORT || 5000;
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});

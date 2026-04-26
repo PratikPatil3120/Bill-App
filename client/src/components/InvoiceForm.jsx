@@ -3,8 +3,9 @@ import { Form, Button, Row, Col } from "react-bootstrap";
 import API from "../services/api";
 import { toast } from "react-toastify";
 
-export default function InvoiceForm({ onSuccess, formattedDate }) {
+export default function InvoiceForm({ onSuccess, formattedDate, setFetch }) {
   const [customerName, setCustomerName] = useState("");
+  const [address, setAddress] = useState("");
   const [customerNo, setCustomerNo] = useState("");
   const [addvancePayment, setAddvancePayment] = useState("");
 
@@ -38,8 +39,12 @@ export default function InvoiceForm({ onSuccess, formattedDate }) {
     e.preventDefault();
 
     try {
+      const formattedItems = items.map((item) => ({
+        ...item,
+        date: new Date(item.date), // ✅ convert to valid Date
+      }));
       const totalAmount = items.reduce(
-        (sum, item) => sum + item.quantity * item.price,
+        (sum, item) => sum + Number(item.price || 0),
         0,
       );
 
@@ -47,13 +52,15 @@ export default function InvoiceForm({ onSuccess, formattedDate }) {
         customerName,
         custmer_no: customerNo,
         advance: addvancePayment,
-        items,
+        address,
+        items: formattedItems, // ✅ use formatted items
         totalAmount,
       });
 
       console.log("API SUCCESS"); // 👈 check this
 
       toast.success("✅ Invoice created successfully!");
+      setFetch(true);
 
       setCustomerName("");
       setCustomerNo("");
@@ -76,6 +83,15 @@ export default function InvoiceForm({ onSuccess, formattedDate }) {
             type="text"
             value={customerName}
             onChange={(e) => setCustomerName(e.target.value)}
+            required
+          />
+        </Col>
+        <Col>
+          <Form.Label>Address</Form.Label>
+          <Form.Control
+            type="text"
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
             required
           />
         </Col>
@@ -142,16 +158,18 @@ export default function InvoiceForm({ onSuccess, formattedDate }) {
       </Button>
 
       {/* Total */}
-      <div className="mb-3">
+      {/* <div className="mb-3">
         <b>
           Total: ₹
           {items.reduce((sum, item) => sum + item.quantity * item.price, 0)}
         </b>
-      </div>
+      </div> */}
 
       {/* Submit */}
       <div className="text-end">
-        <Button type="submit">Save</Button>
+        <Button type="submit" size="lg">
+          Save
+        </Button>
       </div>
     </Form>
   );

@@ -7,6 +7,8 @@ import InvoicePrint from "./InvoicePrint";
 import Pagination from "./common/Pagination";
 import Modals from "./common/Modal";
 import { convertToDateFormat } from "../uttils/Dateutillis";
+import "../App.css"; // or correct path
+import { Button as PrimeButton } from "primereact/button";
 
 const Card = styled.div`
   background: #f9f9f9;
@@ -16,7 +18,7 @@ const Card = styled.div`
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
 `;
 
-export default function InvoiceList() {
+export default function InvoiceList({ fetch, setFetch }) {
   const [data, setData] = useState([]);
   const [searchName, setSearchName] = useState([]);
 
@@ -25,9 +27,18 @@ export default function InvoiceList() {
   //   setIsOpen(true);
   // };
 
+  console.log("fetch", fetch);
+
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedId, setSelectedId] = useState(null);
   const recordsPerPage = 10;
+
+  useEffect(() => {
+    API.get("/invoices").then((res) => {
+      setData(res.data);
+      setFetch(false); // reset trigger
+    });
+  }, [fetch]); // 👈 important
 
   const filterName = data?.filter((item) =>
     item?.customerName
@@ -39,6 +50,7 @@ export default function InvoiceList() {
   const indexOfFirst = indexOfLast - recordsPerPage;
 
   const currentRecords = filterName.slice(indexOfFirst, indexOfLast);
+  console.log("currentRecords", currentRecords);
 
   console.log("filterName,,,,,,,,,,,", filterName);
 
@@ -137,7 +149,7 @@ export default function InvoiceList() {
               <tr>
                 <th>Sr.No</th>
                 <th>Customer Name</th>
-                <th>Date/Time</th>
+                <th>Date</th>
                 <th>Mobile Number</th>
                 <th>Advnace Payment</th>
                 <th>Pending Payment</th>
@@ -152,9 +164,10 @@ export default function InvoiceList() {
                   <td>{index + 1}</td>
                   <td>{inv.customerName}</td>
                   <td>
-                    {inv.items.map((item, i) => (
+                    {/* {inv.items.map((item, i) => (
                       <div key={i}>{convertToDateFormat(item.date)}</div>
-                    ))}
+                    ))} */}
+                    {convertToDateFormat(inv.items?.[0]?.date)}{" "}
                   </td>
                   <td>{inv.custmer_no}</td>
                   <td>₹{inv.advance ? inv.advance : "0"}</td>
@@ -184,9 +197,28 @@ export default function InvoiceList() {
                     >
                       Delete
                     </Button>
+                    <PrimeButton
+                      label="View"
+                      severity="info"
+                      outlined
+                      onClick={() => {
+                        setSelectedId(inv._id);
+                        setIsOpen(true);
+                      }}
+                    />
                   </td>
                 </tr>
               ))}
+              {currentRecords?.length === 0 && (
+                <tr>
+                  <td colSpan="12">
+                    <div className="no-data-container">
+                      <i className="bi bi-search no-data-icon"></i>
+                      <h6>No Records Found</h6>
+                    </div>
+                  </td>
+                </tr>
+              )}
             </tbody>
           </Table>
         </div>

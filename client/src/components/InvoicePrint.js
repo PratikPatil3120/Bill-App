@@ -3,103 +3,159 @@ import React from "react";
 export default function InvoicePrint({ data }) {
   if (!data) return null;
 
+  const thStyle = {
+    border: "1px solid #000",
+    padding: "6px",
+    textAlign: "center",
+    fontWeight: "bold",
+  };
+
+  const tdStyle = {
+    border: "1px solid #000",
+    padding: "6px",
+    textAlign: "center",
+  };
+
+  // const lineStyle = {
+  //   margin: "6px 0",
+  //   borderBottom: "1px dashed #000",
+  // };
+
   return (
-    <div
-      style={{ padding: "10px", fontFamily: "Arial", border: "1px solid #000" }}
-    >
-      {/* Title */}
-      <h3 style={{ textAlign: "center", marginBottom: "10px" }}>Tax Invoice</h3>
-
-      {/* Header Section */}
-      <div style={{ display: "flex", border: "1px solid #000" }}>
-        {/* Left Logo */}
-        <div
-          style={{ flex: 1, padding: "10px", borderRight: "1px solid #000" }}
-        >
-          <h2 style={{ color: "#e91e63" }}>Balaji Graphics</h2>
-          <p>Printing & Design</p>
+    <div style={{ width: "800px", margin: "auto", fontFamily: "Arial" }}>
+      {/* HEADER */}
+      <div style={{ display: "flex", justifyContent: "space-between" }}>
+        <div>
+          <h3 style={{ margin: 0 }}>BALAJI GRAPHICS</h3>
+          <p style={{ margin: "2px 0", fontSize: "12px" }}>
+            Sangli-Tasgaon Main Road, Near Kokate Paints &<br />
+            Korade Furniture, Budhgaon.
+          </p>
+          <p style={{ margin: "2px 0", fontSize: "12px" }}>
+            Prop. Himani Patil - 7744089034
+          </p>
         </div>
 
-        {/* Right Company Details */}
-        <div style={{ flex: 1, padding: "10px" }}>
-          <b>Balaji Graphics</b>
-          <br />
-          Sangli, Tasgaon Road
-          <br />
-          Maharashtra, India
-          <br />
-          Phone: 9876543210
-          <br />
-          Email: balaji@gmail.com
-          <br />
-          GSTIN: XXXXXXXX
+        <div>
+          <img src="/graphicsLogo.jpg" alt="logo" style={{ width: "80px" }} />
         </div>
       </div>
 
-      {/* Customer + Invoice Info */}
-      <div
-        style={{ display: "flex", border: "1px solid #000", borderTop: "none" }}
-      >
-        {/* Customer */}
-        <div
-          style={{ flex: 1, padding: "10px", borderRight: "1px solid #000" }}
-        >
-          <b>To</b>
-          <br />
-          {data.customerName}
-          <br />
+      <hr style={{ border: "1px solid #000" }} />
+
+      {/* BILL TITLE */}
+      <h2 style={{ textAlign: "center", color: "#1e88e5" }}>BILL</h2>
+
+      {/* BILL TO */}
+      <div style={{ display: "flex", justifyContent: "space-between" }}>
+        <div>
+          <b>Bill To</b>
+          <p style={{ margin: "5px 0" }}>{data.customerName}</p>
         </div>
 
-        {/* Invoice Details */}
-        <div style={{ flex: 1, padding: "10px" }}>
-          <div>
-            <b>Invoice No:</b> {data._id}
-          </div>
-          <div>
-            <b>Date:</b> {new Date().toLocaleDateString()}
-          </div>
+        <div style={{ textAlign: "right" }}>
+          <b>Invoice Details</b>
+          <p style={{ margin: "5px 0" }}>Invoice No: {data._id}</p>
+          <p style={{ margin: "5px 0" }}>
+            Date: {new Date(data.createdAt).toLocaleDateString()}
+          </p>
         </div>
       </div>
 
-      {/* Items Table */}
+      {/* TABLE */}
       <table
         style={{
           width: "100%",
           borderCollapse: "collapse",
-          marginTop: "10px",
+          marginTop: "15px",
+          fontSize: "13px",
+          border: "1px solid #000",
         }}
-        border="1"
       >
-        <thead style={{ background: "#1976d2", color: "#fff" }}>
+        <thead style={{ background: "#1e88e5", color: "#fff" }}>
           <tr>
-            <th>SNo</th>
-            <th>Item Description</th>
-            <th>Qty</th>
-            <th>Rate</th>
-            <th>Tax</th>
+            <th style={thStyle}>Sr.No</th>
+            <th style={thStyle}>Item name</th>
+            <th style={thStyle}>Quantity</th>
+            <th style={thStyle}>Price/Unit</th>
+            <th style={thStyle}>Amount</th>
           </tr>
         </thead>
 
         <tbody>
-          <tr>
-            <td>1</td>
-            <td>{data.customerName}</td>
-            <td>1</td>
-            <td>{data.totalAmount}</td>
-            <td>GST 18%</td>
-          </tr>
+          {data.items.map((item, index) => (
+            <tr key={item._id || index}>
+              <td style={tdStyle}>{index + 1}</td>
+              <td style={tdStyle}>{item.name}</td>
+              <td style={tdStyle}>{item.quantity}</td>
+              <td style={tdStyle}>₹ {item.price}</td>
+              <td style={tdStyle}>₹ {item.price}</td>
+            </tr>
+          ))}
         </tbody>
       </table>
 
-      {/* Summary */}
-      <div style={{ marginTop: "10px", textAlign: "right" }}>
-        <b>Total: ₹{data.totalAmount}</b>
-      </div>
+      <hr style={{ marginTop: "10px", border: "1px solid #000" }} />
 
-      {/* Footer */}
-      <div style={{ display: "flex", marginTop: "40px" }}>
-        <div style={{ flex: 1 }}>Customer Signature</div>
-        <div style={{ flex: 1, textAlign: "right" }}>Authorized Signature</div>
+      {/* SUMMARY (NEW SIMPLE STYLE) */}
+      {/* 🔹 BOTTOM SECTION */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          marginTop: "15px",
+          gap: "20px",
+        }}
+      >
+        {/* LEFT SIDE */}
+        <div style={{ fontSize: "13px", width: "60%" }}>
+          <p>
+            <b>Invoice Amount in Words:</b> {data.totalAmount} only
+          </p>
+
+          <p>
+            <b>Payment Mode:</b> Cash / Online
+          </p>
+
+          <p>
+            <b>Terms and Conditions</b>
+            <br />
+            • काम दिल्यावर वेळेत पूर्ण केले जाईल <br />
+            • साहित्याच्या वेळेत उशीर झाल्यास जबाबदारी नाही <br />• तांत्रिक
+            कारणास्तव फरक पडल्यास सहकार्य करावे
+          </p>
+
+          <p>
+            <b>Bank Details</b>
+            <br />
+            Bank Name: Bank of Maharashtra <br />
+            Name: Himani Amit Patil <br />
+            Account No: 60175145393 <br />
+            IFSC: MAHB0001856
+          </p>
+        </div>
+
+        {/* RIGHT SIDE */}
+        <div
+          style={{
+            fontSize: "13px",
+            width: "35%",
+            marginLeft: "auto",
+          }}
+        >
+          <div>Sub Total: ₹ {data.totalAmount}</div>
+          <div style={{ borderBottom: "1px solid #000", margin: "6px 0" }} />
+
+          <div>
+            <b>Total: ₹ {data.totalAmount}</b>
+          </div>
+          <div style={{ borderBottom: "1px solid #000", margin: "6px 0" }} />
+
+          <div>Received: ₹ {data.totalAmount}</div>
+          <div style={{ borderBottom: "1px solid #000", margin: "6px 0" }} />
+
+          <div>Previous Balance: ₹ 0</div>
+        </div>
       </div>
     </div>
   );
