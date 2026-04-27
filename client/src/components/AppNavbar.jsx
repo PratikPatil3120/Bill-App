@@ -3,10 +3,13 @@ import React, { useState } from "react";
 import { Navbar, Nav, Container, Button, Modal } from "react-bootstrap";
 import InvoiceForm from "./InvoiceForm";
 import InvoiceList from "./InvoiceList";
+import { convertToDateFormat } from "../uttils/Dateutillis";
 
 export default function AppNavbar() {
   const [show, setShow] = useState(false);
   const [fetch, setFetch] = useState(false);
+  const [invoiceId, setinvoiceId] = useState();
+  const [getDataById, setDataById] = useState();
 
   const today = new Date();
   const formattedDate = `${today.getDate()}/${today.getMonth() + 1}/${today.getFullYear()}`;
@@ -33,7 +36,14 @@ export default function AppNavbar() {
             <Nav>{/* <Nav.Link href="#">Invoices</Nav.Link> */}</Nav>
 
             {/* Right Side Button */}
-            <Button variant="success" onClick={() => setShow(true)}>
+            <Button
+              variant="success"
+              onClick={() => {
+                setShow(true);
+                setDataById("");
+                setinvoiceId("");
+              }}
+            >
               + Create Invoice
             </Button>
           </Navbar.Collapse>
@@ -43,18 +53,31 @@ export default function AppNavbar() {
       {/* Modal */}
       <Modal show={show} onHide={() => setShow(false)} centered size="lg">
         <Modal.Header closeButton>
-          <Modal.Title>Create Invoice : {formattedDate}</Modal.Title>
+          <Modal.Title>
+            Create Invoice :{" "}
+            {invoiceId
+              ? convertToDateFormat(getDataById?.items[0]?.date)
+              : formattedDate}{" "}
+          </Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <InvoiceForm
             onSuccess={() => setShow(false)}
             formattedDate={formattedDate}
             setFetch={setFetch}
+            invoiceId={invoiceId}
+            setDataById={setDataById}
+            getDataById={getDataById}
           />
         </Modal.Body>
       </Modal>
 
-      <InvoiceList fetch={fetch} setFetch={setFetch} />
+      <InvoiceList
+        fetch={fetch}
+        setFetch={setFetch}
+        setShow={setShow}
+        setinvoiceId={setinvoiceId}
+      />
     </>
   );
 }

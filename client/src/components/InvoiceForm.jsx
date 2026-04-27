@@ -1,13 +1,23 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Form, Button, Row, Col } from "react-bootstrap";
 import API from "../services/api";
 import { toast } from "react-toastify";
 
-export default function InvoiceForm({ onSuccess, formattedDate, setFetch }) {
+export default function InvoiceForm({
+  onSuccess,
+  formattedDate,
+  setFetch,
+  invoiceId,
+  getDataById,
+  setDataById,
+}) {
   const [customerName, setCustomerName] = useState("");
   const [address, setAddress] = useState("");
   const [customerNo, setCustomerNo] = useState("");
   const [addvancePayment, setAddvancePayment] = useState("");
+  const [file, setFile] = useState(null);
+  const [preview, setPreview] = useState(null);
+  const [existingAttachment, setExistingAttachment] = useState(null);
 
   const [items, setItems] = useState([
     { name: "", quantity: 1, price: 0, date: new Date() },
@@ -19,6 +29,25 @@ export default function InvoiceForm({ onSuccess, formattedDate, setFetch }) {
     updated[index][field] = value;
     setItems(updated);
   };
+
+  useEffect(() => {
+    if (!invoiceId) return;
+
+    API.get(`/invoices/${invoiceId}`)
+      .then((res) => setDataById(res.data.data))
+      .catch((err) => console.error(err));
+  }, [invoiceId]);
+
+  useEffect(() => {
+    if (getDataById) {
+      setCustomerName(getDataById.customerName || "");
+      setAddress(getDataById.address || "");
+      setCustomerNo(getDataById.custmer_no || "");
+      setAddvancePayment(getDataById.advance || 0);
+      setItems(getDataById.items || []);
+      setExistingAttachment(getDataById.attachment || null);
+    }
+  }, [getDataById]);
 
   // Add item
   const addItem = () => {
@@ -34,42 +63,71 @@ export default function InvoiceForm({ onSuccess, formattedDate, setFetch }) {
     setItems(updated);
   };
 
+  const handleFileChange = (e) => {
+    const selectedFile = e.target.files[0];
+    setFile(selectedFile);
+
+    if (selectedFile) {
+      setPreview(URL.createObjectURL(selectedFile));
+    }
+  };
+
   // Submit
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      const formattedItems = items.map((item) => ({
+      const formattedItems = items.map(({ _id, ...item }) => ({
         ...item,
-        date: new Date(item.date), // ✅ convert to valid Date
+        date:
+          item.date && !isNaN(new Date(item.date)) ? new Date(item.date) : null,
       }));
       const totalAmount = items.reduce(
         (sum, item) => sum + Number(item.price || 0),
         0,
       );
 
-      await API.post("/invoices", {
-        customerName,
-        custmer_no: customerNo,
-        advance: addvancePayment,
-        address,
-        items: formattedItems, // ✅ use formatted items
-        totalAmount,
-      });
+      const formData = new FormData();
 
-      console.log("API SUCCESS"); // 👈 check this
+      formData.append("customerName", customerName);
+      formData.append("custmer_no", customerNo);
+      formData.append("advance", addvancePayment);
+      formData.append("address", address);
+      formData.append("items", JSON.stringify(formattedItems));
+      formData.append("totalAmount", totalAmount);
 
-      toast.success("✅ Invoice created successfully!");
+      if (file) {
+        formData.append("attachment", file);
+      }
+
+      // MAIN FIX HERE
+      if (invoiceId) {
+        await API.put(`/invoices/${invoiceId}`, formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+
+        toast.success("✅ Invoice updated successfully!");
+      } else {
+        await API.post("/invoices", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+
+        toast.success("✅ Invoice created successfully!");
+      }
+
+      onSuccess();
       setFetch(true);
-
-      setCustomerName("");
-      setCustomerNo("");
-      setItems([{ name: "", quantity: 1, price: 0 }]);
-
-      onSuccess && onSuccess();
     } catch (error) {
-      console.error("API ERROR", error); // 👈 IMPORTANT
-      toast.error("❌ Failed to create invoice");
+      console.error(error);
+      toast.error(
+        invoiceId
+          ? "❌ Failed to update invoice"
+          : "❌ Failed to create invoice",
+      );
     }
   };
 
@@ -115,6 +173,50 @@ export default function InvoiceForm({ onSuccess, formattedDate, setFetch }) {
             required
           />
         </Col>
+      </Row>
+      <Row>
+        <Col>
+          <Form.Group className="mt-2">
+            <Form.Label>Attachment</Form.Label>
+            <Form.Control type="file" onChange={handleFileChange} />
+          </Form.Group>
+        </Col>
+        {existingAttachment && !preview && (
+          <div
+            style={{
+              marginTop: "10px",
+              padding: "10px",
+              border: "1px solid #ccc",
+              borderRadius: "8px",
+              width: "250px",
+              background: "#f9f9f9",
+            }}
+          >
+            <p style={{ margin: 0, fontSize: "12px" }}>Existing Attachment:</p>
+
+            {existingAttachment.endsWith(".png") ||
+            existingAttachment.endsWith(".jpg") ||
+            existingAttachment.endsWith(".jpeg") ? (
+              <img
+                src={`http://localhost:5000/uploads/${existingAttachment}`}
+                alt="attachment"
+                style={{
+                  width: "100%",
+                  marginTop: "5px",
+                  borderRadius: "6px",
+                }}
+              />
+            ) : (
+              <a
+                href={`http://localhost:5000/uploads/${existingAttachment}`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                📄 View File
+              </a>
+            )}
+          </div>
+        )}
       </Row>
 
       {/* Items Section */}
@@ -167,9 +269,15 @@ export default function InvoiceForm({ onSuccess, formattedDate, setFetch }) {
 
       {/* Submit */}
       <div className="text-end">
-        <Button type="submit" size="lg">
-          Save
-        </Button>
+        {invoiceId ? (
+          <Button type="submit" size="md">
+            Update
+          </Button>
+        ) : (
+          <Button type="submit" size="md">
+            Save
+          </Button>
+        )}
       </div>
     </Form>
   );
