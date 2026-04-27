@@ -8,7 +8,7 @@ import Pagination from "./common/Pagination";
 import Modals from "./common/Modal";
 import { convertToDateFormat } from "../uttils/Dateutillis";
 import "../App.css"; // or correct path
-import { Button as PrimeButton } from "primereact/button";
+import { MdDelete, MdLocalPrintshop } from "react-icons/md";
 
 const Card = styled.div`
   background: #f9f9f9;
@@ -18,7 +18,12 @@ const Card = styled.div`
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
 `;
 
-export default function InvoiceList({ fetch, setFetch }) {
+export default function InvoiceList({
+  fetch,
+  setFetch,
+  setShow,
+  setinvoiceId,
+}) {
   const [data, setData] = useState([]);
   const [searchName, setSearchName] = useState([]);
 
@@ -120,7 +125,7 @@ export default function InvoiceList({ fetch, setFetch }) {
   }, [selected]);
 
   return (
-    <Container>
+    <Container fluid>
       <Card>
         <Modals show={isOpen} handleClose={handleModalAction} title={"Alert"} />
         <div className="d-flex justify-content-between">
@@ -155,6 +160,7 @@ export default function InvoiceList({ fetch, setFetch }) {
                 <th>Pending Payment</th>
                 <th>Total Amount</th>
                 <th>Action</th>
+                <th>Attachment</th>
               </tr>
             </thead>
 
@@ -183,29 +189,46 @@ export default function InvoiceList({ fetch, setFetch }) {
                     <Button
                       variant="primary"
                       size="sm"
-                      onClick={() => handlePrint(inv)}
-                    >
-                      Print
-                    </Button>
-                    <Button
-                      variant="danger"
-                      size="sm"
                       onClick={() => {
-                        setSelectedId(inv._id); // ✅ store id
-                        setIsOpen(true); // open modal
+                        setShow(true);
+                        setinvoiceId(inv._id);
                       }}
                     >
-                      Delete
+                      View
                     </Button>
-                    <PrimeButton
-                      label="View"
-                      severity="info"
-                      outlined
+                    <MdLocalPrintshop
+                      onClick={() => handlePrint(inv)}
+                      style={{
+                        fontSize: "22px",
+                        cursor: "pointer",
+                        marginRight: "10px",
+                      }}
+                    />
+
+                    <MdDelete
                       onClick={() => {
                         setSelectedId(inv._id);
                         setIsOpen(true);
                       }}
+                      style={{
+                        fontSize: "22px",
+                        cursor: "pointer",
+                        color: "red", // delete icon red
+                      }}
                     />
+                  </td>
+                  <td>
+                    {inv.attachment ? (
+                      <a
+                        href={`http://localhost:5000/uploads/${inv.attachment}`}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        View File
+                      </a>
+                    ) : (
+                      "No File"
+                    )}
                   </td>
                 </tr>
               ))}

@@ -16,6 +16,9 @@ const invoiceSchema = new mongoose.Schema(
     custmer_no: Number,
     advance: Number,
     address: String,
+    attachment: {
+      type: String,
+    },
   },
   { timestamps: true },
 );
